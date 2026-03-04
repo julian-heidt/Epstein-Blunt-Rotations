@@ -1,41 +1,55 @@
-version: "3.9"
+# Docker Swarm stack file.
+# Build images first:  docker compose build
+# Deploy to swarm:     docker stack deploy -c docker-compose.yml ebr
+# Env vars must be exported before deploying:
+#   export $(grep -v '^#' .env | xargs) && docker stack deploy -c docker-compose.yml ebr
 
 services:
   mongo:
     image: mongo:7
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
+    # No ports exposed — only reachable via Docker overlay network
     volumes:
       - mongo_data:/data/db
     environment:
       MONGO_INITDB_DATABASE: cursed_rotations
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
     healthcheck:
       test: mongosh --eval "db.runCommand('ping').ok" --quiet
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
 
   backend:
+    image: cursedbluntrotations-backend:latest
     build: ./backend
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-    depends_on:
-      mongo:
-        condition: service_healthy
+    # No ports exposed — only reachable via nginx on the overlay network
     environment:
-      MONGO_URI: mongodb://mongo:27017/cursed_rotations
+      MONGO_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/cursed_rotations?authSource=admin
       FORCE_RESEED: "false"
       PYTHONUNBUFFERED: "1"
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3500}
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
 
   frontend:
+    image: cursedbluntrotations-frontend:latest
     build: ./frontend
-    restart: unless-stopped
     ports:
-      - "3000:3000"
-    depends_on:
-      - backend
+      - "3500:3500"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
 
 volumes:
   mongo_data:

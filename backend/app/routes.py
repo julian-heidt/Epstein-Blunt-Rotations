@@ -1,6 +1,6 @@
 """API routes for the Cursed Blunt Rotation backend."""
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Path
 from app.database import get_db
 from app.models import PersonSummary, PersonDetail, HealthResponse
 
@@ -43,7 +43,7 @@ async def health_check():
 @router.get("/people", response_model=list[PersonSummary])
 async def list_people(
     has_photo: bool | None = Query(None, description="Filter to people with photos only"),
-    letter: str | None = Query(None, description="Filter by section letter (A-Z)"),
+    letter: str | None = Query(None, max_length=1, pattern=r'^[A-Za-z]$', description="Filter by section letter (A-Z)"),
 ):
     db = get_db()
     query = {}
@@ -72,7 +72,7 @@ async def random_people(
 
 
 @router.get("/people/{slug}", response_model=PersonDetail)
-async def get_person(slug: str):
+async def get_person(slug: str = Path(..., max_length=80, pattern=r'^[a-z0-9\-]+$')):
     db = get_db()
     person = await db.people.find_one({"slug": slug}, DETAIL_PROJECTION)
     if not person:
