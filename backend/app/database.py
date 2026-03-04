@@ -3,7 +3,7 @@
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
 
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/cursed_rotations")
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/evil_blunts")
 
 _client = None
 _db = None

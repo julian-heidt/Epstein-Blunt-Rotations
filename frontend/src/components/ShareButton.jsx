@@ -7,13 +7,13 @@ export default function ShareButton({ people, tableHash }) {
   const handleShare = async () => {
     const names = people.map(p => p.name).join(', ')
     const url = tableHash ? `${window.location.origin}/table/${tableHash}` : null
-    const text = `My Epstein Blunt Rotation: ${names} 🪑💀`
+    const text = `My Evil Blunts sesh: ${names} 🪑💀`
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Epstein Blunt Rotations',
-          text: url ? text : `${text}\n\n#CursedBluntRotation`,
+          title: 'Evil Blunts',
+          text: url ? text : `${text}\n\n#EvilBlunts`,
           ...(url ? { url } : {}),
         })
         return
@@ -23,7 +23,7 @@ export default function ShareButton({ people, tableHash }) {
     }
 
     // Desktop fallback — copy URL if available, else copy text
-    const toCopy = url ? url : `${text}\n\n#CursedBluntRotation`
+    const toCopy = url ? url : `${text}\n\n#EvilBlunts`
     try {
       await navigator.clipboard.writeText(toCopy)
       alert(url ? 'Link copied to clipboard!' : 'Copied to clipboard!')

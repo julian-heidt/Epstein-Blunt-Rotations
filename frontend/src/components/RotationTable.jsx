@@ -1,13 +1,13 @@
 import Seat from './Seat'
-import YouSeat from './YouSeat'
+import EpsteinSeat from './EpsteinSeat'
 
 /**
  * Circular table with evenly-spaced seats.
- * "YOU" is always at the top (12 o'clock position).
+ * Epstein is always at the top (12 o'clock position).
  * Seats are positioned using trig on a circle.
  */
 export default function RotationTable({ people, onSeatClick }) {
-  const totalSeats = people.length + 1 // +1 for YOU
+  const totalSeats = people.length + 1 // +1 for Epstein
   const angleStep = 360 / totalSeats
 
   // Table dimensions (responsive via CSS)
@@ -17,24 +17,24 @@ export default function RotationTable({ people, onSeatClick }) {
 
   const seats = []
 
-  // YOU is always seat 0, at 270° (top in standard math coords)
-  const youAngle = 270
-  const youRad = (youAngle * Math.PI) / 180
+  // Epstein is always seat 0, at 270° (top in standard math coords)
+  const epsteinAngle = 270
+  const epsteinRad = (epsteinAngle * Math.PI) / 180
   seats.push({
-    key: 'you',
-    isYou: true,
-    angle: youAngle,
-    x: cx + radius * Math.cos(youRad),
-    y: cy + radius * Math.sin(youRad),
+    key: 'epstein',
+    isEpstein: true,
+    angle: epsteinAngle,
+    x: cx + radius * Math.cos(epsteinRad),
+    y: cy + radius * Math.sin(epsteinRad),
   })
 
-  // Place guests clockwise starting from YOU
+  // Place guests clockwise starting from Epstein
   people.forEach((person, i) => {
-    const angle = youAngle + (i + 1) * angleStep
+    const angle = epsteinAngle + (i + 1) * angleStep
     const rad = (angle * Math.PI) / 180
     seats.push({
       key: person.slug || person.name,
-      isYou: false,
+      isEpstein: false,
       person,
       angle: angle % 360,
       x: cx + radius * Math.cos(rad),
@@ -52,8 +52,8 @@ export default function RotationTable({ people, onSeatClick }) {
         <div className="table-surface" />
 
         {seats.map((seat) =>
-          seat.isYou ? (
-            <YouSeat
+          seat.isEpstein ? (
+            <EpsteinSeat
               key={seat.key}
               style={{
                 left: `${seat.x}%`,

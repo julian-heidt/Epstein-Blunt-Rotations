@@ -14,14 +14,14 @@ from scraper.jmail import scrape_jmail, JMAIL_FALLBACK
 from scraper.merge import merge_data
 
 
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/cursed_rotations")
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/evil_blunts")
 FORCE_RESEED = os.environ.get("FORCE_RESEED", "false").lower() == "true"
 
 
 def seed_database():
     """Run the full scrape + merge + insert pipeline."""
     print("=" * 60, flush=True)
-    print("CURSED BLUNT ROTATIONS — Database Seeder", flush=True)
+    print("EVIL BLUNTS — Database Seeder", flush=True)
     print("=" * 60, flush=True)
 
     # Connect to MongoDB

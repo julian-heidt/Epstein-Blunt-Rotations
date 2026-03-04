@@ -40,8 +40,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Epstein Blunt Rotations API",
-    description="API for the Epstein Blunt Rotation generator.",
+    title="Evil Blunts API",
+    description="API for Evil Blunts — smoke seshes from the Epstein files.",
     version="1.0.0",
     lifespan=lifespan,
     # Disable auto-generated docs in production
@@ -74,4 +74,4 @@ app.include_router(leaderboard_router)
 
 @app.get("/")
 async def root():
-    return {"message": "Cursed Blunt Rotations API. Hit /api/health for status."}
+    return {"message": "Evil Blunts API. Hit /api/health for status."}

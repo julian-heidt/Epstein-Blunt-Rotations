@@ -1,14 +1,18 @@
-# Cursed Blunt Rotations 🔥💨
+# Evil Blunts 🔥💨
+
+Smoke seshes from the Epstein files.
 
 Ever wondered who you'd be stuck in a blunt rotation with if the guest list came straight from the Epstein files? No? Well, now you can find out anyway.
 
-**Cursed Blunt Rotations** generates random round-table seating arrangements featuring people named in the Epstein files. Pick your table size (3–7 seats), hit randomize, and see who fate — and public court documents — has seated beside you.
+**Live Demo** https://evilblunts.org
+
+**Evil Blunts** generates random round-table seating arrangements featuring people named in the Epstein files. Pick your table size (3–7 seats), hit randomize, and see who fate — and public court documents — has seated beside Epstein.
 
 ## What It Does
 
 - Pulls real names, photos, and descriptions from [Wikipedia](https://en.wikipedia.org/wiki/List_of_people_named_in_the_Epstein_files)
 - Cross-references email counts from [jmail.world](https://jmail.world/person)
-- Presents them in a round-table UI with a "YOU" seat — because you're always invited
+- Presents them in a round-table UI with Jeffrey Epstein at the head — because he's always hosting
 - Click any seat to see the full bio, email activity, and source links
 
 ## Data Sources
@@ -22,8 +26,8 @@ All data is sourced from publicly available sites:
 
 Images are published to Docker Hub under [`jheidt04`](https://hub.docker.com/u/jheidt04):
 
-- `jheidt04/cursedbluntrotations-backend:latest`
-- `jheidt04/cursedbluntrotations-frontend:latest`
+- `jheidt04/evilblunts-backend:latest`
+- `jheidt04/evilblunts-frontend:latest`
 
 ### Docker Swarm / Portainer
 

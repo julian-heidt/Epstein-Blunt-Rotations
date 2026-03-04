@@ -1,4 +1,4 @@
-"""API routes for the Cursed Blunt Rotation backend."""
+"""API routes for the Evil Blunts backend."""
 
 from fastapi import APIRouter, HTTPException, Query, Path
 from app.database import get_db

@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 WIKI_URL = "https://en.wikipedia.org/wiki/List_of_people_named_in_the_Epstein_files"
 
 HEADERS = {
-    "User-Agent": "CursedBluntRotations/1.0 (Educational project; contact@example.com)"
+    "User-Agent": "EvilBlunts/1.0 (Educational project; contact@example.com)"
 }
 
 

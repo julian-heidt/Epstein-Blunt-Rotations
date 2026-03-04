@@ -16,7 +16,7 @@ export default function Header({ tagline }) {
     <header className="header">
       <div className="header-emoji">{emoji}</div>
       <h1 className="header-title">
-        Epstein Blunt Rotations
+        Evil Blunts
       </h1>
       <p className="header-tagline" key={tagline}>
         {tagline}

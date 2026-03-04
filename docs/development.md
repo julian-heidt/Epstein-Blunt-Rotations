@@ -24,12 +24,12 @@ Images must be built and pushed to Docker Hub before deploying to Swarm/Portaine
 docker compose build
 
 # Tag for Docker Hub
-docker tag cursedbluntrotations-backend:latest jheidt04/cursedbluntrotations-backend:latest
-docker tag cursedbluntrotations-frontend:latest jheidt04/cursedbluntrotations-frontend:latest
+docker tag evilblunts-backend:latest jheidt04/evilblunts-backend:latest
+docker tag evilblunts-frontend:latest jheidt04/evilblunts-frontend:latest
 
 # Push
-docker push jheidt04/cursedbluntrotations-backend:latest
-docker push jheidt04/cursedbluntrotations-frontend:latest
+docker push jheidt04/evilblunts-backend:latest
+docker push jheidt04/evilblunts-frontend:latest
 ```
 
 ## Deploying to Docker Swarm
@@ -82,7 +82,7 @@ The Vite dev server runs on port 5173 by default. Configure the API proxy in `vi
 
 | Variable         | Default                                      | Description                           |
 |------------------|----------------------------------------------|---------------------------------------|
-| `MONGO_URI`      | `mongodb://localhost:27017/cursed_rotations`  | MongoDB connection string             |
+| `MONGO_URI`      | `mongodb://localhost:27017/evil_blunts`        | MongoDB connection string             |
 | `FORCE_RESEED`   | `false`                                      | Set to `true` to re-scrape and reseed |
 | `ALLOWED_ORIGINS` | `http://localhost:3500`                      | Comma-separated CORS origins          |
 | `PYTHONUNBUFFERED` | `1`                                        | Ensures real-time log output in Docker |
@@ -103,7 +103,7 @@ docker compose up --build
 ## Project Structure
 
 ```
-cursed-blunt-rotations/
+evil-blunts/
 ├── docker-compose.yml
 ├── README.md
 ├── docs/
@@ -139,7 +139,7 @@ cursed-blunt-rotations/
         │   ├── Header.jsx
         │   ├── RotationTable.jsx
         │   ├── Seat.jsx
-        │   ├── YouSeat.jsx
+        │   ├── EpsteinSeat.jsx
         │   ├── PersonPicker.jsx
         │   ├── PersonModal.jsx
         │   └── ShareButton.jsx
@@ -155,4 +155,4 @@ cursed-blunt-rotations/
 - Dark theme (`#0a0a0a`) with noise texture
 - Accent: orange (`#ff6b35`), secondary: neon yellow (`#e8ff47`)
 - Fonts: Space Grotesk (headings), DM Sans (body)
-- Round table seats positioned via trigonometry with a "YOU" seat at the top
+- Round table seats positioned via trigonometry with Epstein at the top (12 o'clock)

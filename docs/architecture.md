@@ -2,7 +2,7 @@
 
 ## System Overview
 
-Cursed Blunt Rotations is a three-tier web application that scrapes, merges, and presents data about people named in the Epstein files.
+Evil Blunts is a three-tier web application that scrapes, merges, and presents data about people named in the Epstein files.
 
 ```
 ┌────────────┐     ┌────────────┐     ┌──────────┐
@@ -23,7 +23,7 @@ All three services run via Docker Swarm (or Docker Compose for local development
 - Image: `mongo:4.4` (4.4 is the latest version that does not require AVX CPU support)
 - Persistent volume: `mongo_data`
 - Healthcheck: `mongo --eval "db.runCommand('ping').ok"`
-- Database: `cursed_rotations`, collection: `people`
+- Database: `evil_blunts`, collection: `people`
 - Indexes: `slug` (unique), `has_photo`, `section_letter`
 
 ### Backend (`backend`)
@@ -48,6 +48,8 @@ All three services run via Docker Swarm (or Docker Compose for local development
    - **Step 4**: Insert merged documents into MongoDB
 3. Uvicorn starts serving the FastAPI app on port 8000
 4. Frontend nginx serves the React SPA and proxies API calls
+
+The round table always seats Jeffrey Epstein at the 12 o'clock position, with guests placed clockwise around him.
 
 ## API Endpoints
 

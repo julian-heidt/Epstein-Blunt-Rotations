@@ -2,10 +2,10 @@
 #
 # Build & push images:
 #   docker compose build
-#   docker tag cursedbluntrotations-backend:latest jheidt04/cursedbluntrotations-backend:latest
-#   docker tag cursedbluntrotations-frontend:latest jheidt04/cursedbluntrotations-frontend:latest
-#   docker push jheidt04/cursedbluntrotations-backend:latest
-#   docker push jheidt04/cursedbluntrotations-frontend:latest
+#   docker tag evilblunts-backend:latest jheidt04/evilblunts-backend:latest
+#   docker tag evilblunts-frontend:latest jheidt04/evilblunts-frontend:latest
+#   docker push jheidt04/evilblunts-backend:latest
+#   docker push jheidt04/evilblunts-frontend:latest
 #
 # Deploy to swarm:
 #   docker stack deploy -c docker-compose.yml ebr
@@ -22,7 +22,7 @@ services:
     volumes:
       - mongo_data:/data/db
     environment:
-      MONGO_INITDB_DATABASE: cursed_rotations
+      MONGO_INITDB_DATABASE: evil_blunts
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
     healthcheck:
@@ -37,11 +37,11 @@ services:
         max_attempts: 5
 
   backend:
-    image: jheidt04/cursedbluntrotations-backend:latest
+    image: jheidt04/evilblunts-backend:latest
     build: ./backend
     # No ports exposed — only reachable via nginx on the overlay network
     environment:
-      MONGO_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/cursed_rotations?authSource=admin
+      MONGO_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/evil_blunts?authSource=admin
       FORCE_RESEED: "false"
       PYTHONUNBUFFERED: "1"
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3500}
@@ -52,7 +52,7 @@ services:
         max_attempts: 5
 
   frontend:
-    image: jheidt04/cursedbluntrotations-frontend:latest
+    image: jheidt04/evilblunts-frontend:latest
     build: ./frontend
     ports:
       - "3500:3500"
