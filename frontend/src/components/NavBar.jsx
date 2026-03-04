@@ -5,7 +5,7 @@ export default function NavBar({ screen, onNavigate }) {
   return (
     <nav className="navbar">
       <span className="navbar-brand" onClick={() => onNavigate('home')}>
-        🪑 EBR
+        🪑 EB
       </span>
       <div className="navbar-links">
         <button
