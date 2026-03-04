@@ -20,9 +20,9 @@ All three services run via Docker Swarm (or Docker Compose for local development
 ## Services
 
 ### MongoDB (`mongo`)
-- Image: `mongo:7`
+- Image: `mongo:4.4` (4.4 is the latest version that does not require AVX CPU support)
 - Persistent volume: `mongo_data`
-- Healthcheck: `mongosh --eval "db.runCommand('ping').ok"`
+- Healthcheck: `mongo --eval "db.runCommand('ping').ok"`
 - Database: `cursed_rotations`, collection: `people`
 - Indexes: `slug` (unique), `has_photo`, `section_letter`
 
@@ -64,7 +64,7 @@ All three services run via Docker Swarm (or Docker Compose for local development
 |-----------|-------------------------------------|
 | Frontend  | React 18, Vite 5, plain CSS        |
 | Backend   | Python 3.12, FastAPI, Motor (async) |
-| Database  | MongoDB 7                           |
+| Database  | MongoDB 4.4                         |
 | Scraping  | BeautifulSoup4, lxml, requests      |
 | Matching  | thefuzz (fuzzy string matching)     |
 | Deploy    | Docker Swarm, Portainer, Docker Hub  |
