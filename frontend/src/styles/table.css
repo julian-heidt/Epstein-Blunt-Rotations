@@ -145,13 +145,8 @@
 
 /* Epstein avatar special styles */
 .seat-avatar--epstein {
-  background: var(--accent);
   border-color: var(--accent);
   box-shadow: 0 0 24px var(--accent-glow);
-}
-
-.epstein-emoji {
-  font-size: clamp(1.4rem, 3vw, 2rem);
 }
 
 /* ============================================
