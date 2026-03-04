@@ -1,0 +1,214 @@
+/* ============================================
+   TABLE SCREEN — Round table + seats
+   ============================================ */
+
+.table-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+  padding: 1rem 1rem 2rem;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 700px;
+  margin-bottom: 1rem;
+}
+
+.table-tagline {
+  margin-top: 1.5rem;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.9rem;
+  text-align: center;
+  animation: fadeIn 0.6s ease;
+}
+
+/* ============================================
+   ROTATION TABLE WRAPPER
+   ============================================ */
+
+.rotation-table-wrapper {
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 1 / 1;
+}
+
+.rotation-table {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================
+   TABLE SURFACE — the brown circle
+   ============================================ */
+
+.table-surface {
+  position: absolute;
+  width: 55%;
+  height: 55%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    ellipse at 40% 35%,
+    var(--table-brown-light) 0%,
+    var(--table-brown) 100%
+  );
+  border-radius: var(--radius-round);
+  border: 3px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 0 60px rgba(61, 43, 31, 0.4),
+    inset 0 -4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Subtle wood grain effect */
+.table-surface::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-round);
+  background: repeating-linear-gradient(
+    120deg,
+    transparent,
+    transparent 8px,
+    rgba(255, 255, 255, 0.015) 8px,
+    rgba(255, 255, 255, 0.015) 9px
+  );
+}
+
+/* ============================================
+   SEAT — positioned absolutely with trig
+   ============================================ */
+
+.seat {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  transition: transform 0.25s ease;
+  z-index: 2;
+}
+
+.seat:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.seat:hover .seat-avatar {
+  box-shadow: 0 0 20px var(--accent-glow);
+  border-color: var(--accent);
+}
+
+/* ============================================
+   SEAT AVATAR — the circular photo
+   ============================================ */
+
+.seat-avatar {
+  width: clamp(54px, 10vw, 76px);
+  height: clamp(54px, 10vw, 76px);
+  border-radius: var(--radius-round);
+  overflow: hidden;
+  border: 3px solid var(--border-light);
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.seat-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.seat-initials {
+  font-family: var(--font-heading);
+  font-size: clamp(0.8rem, 2vw, 1.1rem);
+  font-weight: 700;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* YOU avatar special styles */
+.seat-avatar--you {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 24px var(--accent-glow);
+}
+
+.you-emoji {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+}
+
+/* ============================================
+   SEAT NAME — label below/above the avatar
+   ============================================ */
+
+.seat-name {
+  font-family: var(--font-heading);
+  font-size: clamp(0.6rem, 1.5vw, 0.8rem);
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  white-space: nowrap;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.seat-name--you {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: clamp(0.7rem, 1.8vw, 0.9rem);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+/* Names always below the avatar */
+.seat--below {
+  flex-direction: column;
+}
+
+/* ============================================
+   SHARE BUTTON
+   ============================================ */
+
+.share-btn {
+  font-size: 0.85rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 480px) {
+  .rotation-table-wrapper {
+    max-width: 340px;
+  }
+
+  .seat-avatar {
+    width: 48px;
+    height: 48px;
+    border-width: 2px;
+  }
+
+  .seat-name {
+    font-size: 0.55rem;
+    max-width: 60px;
+  }
+}

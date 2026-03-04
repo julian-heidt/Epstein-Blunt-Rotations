@@ -1,0 +1,88 @@
+# ========================
+# Dependencies
+# ========================
+node_modules/
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# ========================
+# Build / Dist
+# ========================
+dist/
+build/
+*.egg-info/
+*.egg
+*.whl
+
+# ========================
+# Docker
+# ========================
+# Persistent volumes (if mounted locally)
+mongo_data/
+data/
+
+# ========================
+# IDE / Editor
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ========================
+# OS
+# ========================
+*.log
+*.tmp
+*.bak
+*.orig
+
+# ========================
+# Python
+# ========================
+*.pyc
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ========================
+# Node / Frontend
+# ========================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ========================
+# Secrets / Sensitive
+# ========================
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+secrets/
+credentials/
+*.secret
+.env.local
+.env.production
+.env.staging
