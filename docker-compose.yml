@@ -1,8 +1,19 @@
 # Docker Swarm stack file.
-# Build images first:  docker compose build
-# Deploy to swarm:     docker stack deploy -c docker-compose.yml ebr
+#
+# Build & push images:
+#   docker compose build
+#   docker tag cursedbluntrotations-backend:latest jheidt04/cursedbluntrotations-backend:latest
+#   docker tag cursedbluntrotations-frontend:latest jheidt04/cursedbluntrotations-frontend:latest
+#   docker push jheidt04/cursedbluntrotations-backend:latest
+#   docker push jheidt04/cursedbluntrotations-frontend:latest
+#
+# Deploy to swarm:
+#   docker stack deploy -c docker-compose.yml ebr
+#
 # Env vars must be exported before deploying:
 #   export $(grep -v '^#' .env | xargs) && docker stack deploy -c docker-compose.yml ebr
+#
+# Or deploy via Portainer Git integration (images must be pushed first).
 
 services:
   mongo:
@@ -26,7 +37,7 @@ services:
         max_attempts: 5
 
   backend:
-    image: cursedbluntrotations-backend:latest
+    image: jheidt04/cursedbluntrotations-backend:latest
     build: ./backend
     # No ports exposed — only reachable via nginx on the overlay network
     environment:
@@ -41,7 +52,7 @@ services:
         max_attempts: 5
 
   frontend:
-    image: cursedbluntrotations-frontend:latest
+    image: jheidt04/cursedbluntrotations-frontend:latest
     build: ./frontend
     ports:
       - "3500:3500"

@@ -18,6 +18,22 @@ All data is sourced from publicly available sites:
 - **Wikipedia** — biographical info, photos, and article links for 150+ people
 - **jmail.world** — email counts from the Epstein email corpus
 
+## Deployment
+
+Images are published to Docker Hub under [`jheidt04`](https://hub.docker.com/u/jheidt04):
+
+- `jheidt04/cursedbluntrotations-backend:latest`
+- `jheidt04/cursedbluntrotations-frontend:latest`
+
+### Docker Swarm / Portainer
+
+1. Build and push images (see [Development Guide](docs/development.md#building--pushing-images))
+2. In Portainer, add a new stack via **Git Repository**, pointing to this repo
+3. Set the required environment variables (`MONGO_ROOT_USERNAME`, `MONGO_ROOT_PASSWORD`, `ALLOWED_ORIGINS`)
+4. Deploy — Portainer will pull the pre-built images from Docker Hub
+
+> **Note:** Docker Swarm (`docker stack deploy`) does not support `build:` directives. Images must be built and pushed to the registry before deploying.
+
 ## Technical Docs
 
 For developers and contributors:

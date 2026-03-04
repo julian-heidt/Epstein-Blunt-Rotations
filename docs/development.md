@@ -6,7 +6,7 @@
 - Node.js 20+ (for local frontend development)
 - Python 3.12+ (for local backend development)
 
-## Quick Start
+## Quick Start (Local)
 
 ```bash
 docker compose up --build
@@ -14,6 +14,42 @@ docker compose up --build
 
 - Frontend: http://localhost:3000
 - API: http://localhost:8000/api/health
+
+## Building & Pushing Images
+
+Images must be built and pushed to Docker Hub before deploying to Swarm/Portainer.
+
+```bash
+# Build
+docker compose build
+
+# Tag for Docker Hub
+docker tag cursedbluntrotations-backend:latest jheidt04/cursedbluntrotations-backend:latest
+docker tag cursedbluntrotations-frontend:latest jheidt04/cursedbluntrotations-frontend:latest
+
+# Push
+docker push jheidt04/cursedbluntrotations-backend:latest
+docker push jheidt04/cursedbluntrotations-frontend:latest
+```
+
+## Deploying to Docker Swarm
+
+### Via CLI
+
+```bash
+export $(grep -v '^#' .env | xargs)
+docker stack deploy -c docker-compose.yml ebr
+```
+
+### Via Portainer Git Integration
+
+1. Push images to Docker Hub (see above)
+2. In Portainer, create a new **Stack** → choose **Git Repository**
+3. Point to this repo and set `docker-compose.yml` as the compose file
+4. Add environment variables: `MONGO_ROOT_USERNAME`, `MONGO_ROOT_PASSWORD`, `ALLOWED_ORIGINS`
+5. Deploy — Portainer pulls the compose file from Git and the images from Docker Hub
+
+> **Note:** `docker stack deploy` ignores `build:` directives. Images must exist in the registry before deploying.
 
 ## Local Development
 
@@ -48,6 +84,7 @@ The Vite dev server runs on port 5173 by default. Configure the API proxy in `vi
 |------------------|----------------------------------------------|---------------------------------------|
 | `MONGO_URI`      | `mongodb://localhost:27017/cursed_rotations`  | MongoDB connection string             |
 | `FORCE_RESEED`   | `false`                                      | Set to `true` to re-scrape and reseed |
+| `ALLOWED_ORIGINS` | `http://localhost:3500`                      | Comma-separated CORS origins          |
 | `PYTHONUNBUFFERED` | `1`                                        | Ensures real-time log output in Docker |
 
 ## Re-seeding the Database

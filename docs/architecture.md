@@ -15,7 +15,7 @@ Cursed Blunt Rotations is a three-tier web application that scrapes, merges, and
        └─── /api/ ───────┘
 ```
 
-All three services run via Docker Compose.
+All three services run via Docker Swarm (or Docker Compose for local development). Custom images are published to Docker Hub under the `jheidt04` namespace.
 
 ## Services
 
@@ -67,7 +67,7 @@ All three services run via Docker Compose.
 | Database  | MongoDB 7                           |
 | Scraping  | BeautifulSoup4, lxml, requests      |
 | Matching  | thefuzz (fuzzy string matching)     |
-| Deploy    | Docker Compose (3 services)         |
+| Deploy    | Docker Swarm, Portainer, Docker Hub  |
 
 ## License
 
