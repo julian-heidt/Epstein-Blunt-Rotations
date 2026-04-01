@@ -15,16 +15,26 @@
 #
 # Or deploy via Portainer Git integration (images must be pushed first).
 
+volumes:
+  mongo_data:
+    driver: local
+    driver_opts: { type: none, o: bind, device: /mnt/docker/evilblunts/mongo }
+
+networks:
+  ebr-net:
+    driver: overlay
+
 services:
   mongo:
     image: mongo:4.4
-    # No ports exposed — only reachable via Docker overlay network
     volumes:
       - mongo_data:/data/db
     environment:
       MONGO_INITDB_DATABASE: evil_blunts
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    networks:
+      - ebr-net
     healthcheck:
       test: mongo --eval "db.runCommand('ping').ok" --quiet
       interval: 10s
@@ -35,32 +45,62 @@ services:
         condition: on-failure
         delay: 5s
         max_attempts: 5
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.00"
+        reservations:
+          memory: 512M
 
   backend:
     image: jheidt04/evilblunts-backend:latest
     build: ./backend
-    # No ports exposed — only reachable via nginx on the overlay network
     environment:
       MONGO_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/evil_blunts?authSource=admin
       FORCE_RESEED: "false"
       PYTHONUNBUFFERED: "1"
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3500}
+    networks:
+      - ebr-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
     deploy:
       restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 5
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.50"
+        reservations:
+          memory: 256M
 
   frontend:
     image: jheidt04/evilblunts-frontend:latest
     build: ./frontend
     ports:
       - "3500:3500"
+    networks:
+      - ebr-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3500"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     deploy:
       restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 5
-
-volumes:
-  mongo_data:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.25"
+        reservations:
+          memory: 128M
