@@ -6,6 +6,7 @@ Run as: python -m scraper.run
 import os
 import sys
 from datetime import datetime, timezone
+from urllib.parse import quote_plus
 
 from pymongo import MongoClient
 
@@ -14,7 +15,21 @@ from scraper.jmail import scrape_jmail, JMAIL_FALLBACK
 from scraper.merge import merge_data
 
 
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/evil_blunts")
+def _build_mongo_uri() -> str:
+    """Build MongoDB URI, URL-encoding credentials if provided separately."""
+    uri = os.environ.get("MONGO_URI")
+    if uri:
+        return uri
+    user = os.environ.get("MONGO_USERNAME", "")
+    password = os.environ.get("MONGO_PASSWORD", "")
+    host = os.environ.get("MONGO_HOST", "mongo:27017")
+    db = os.environ.get("MONGO_DB", "evil_blunts")
+    if user and password:
+        return f"mongodb://{quote_plus(user)}:{quote_plus(password)}@{host}/{db}?authSource=admin"
+    return f"mongodb://{host}/{db}"
+
+
+MONGO_URI = _build_mongo_uri()
 FORCE_RESEED = os.environ.get("FORCE_RESEED", "false").lower() == "true"
 
 
