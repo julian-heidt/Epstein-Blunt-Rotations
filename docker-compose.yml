@@ -18,7 +18,11 @@
 volumes:
   mongo_data:
     driver: local
-    driver_opts: { type: none, o: bind, device: /mnt/docker/evilblunts/mongo }
+    # NFS is not supported for MongoDB data files — WiredTiger requires POSIX
+    # advisory file locking that NFS does not reliably provide, causing write
+    # failures while reads appear to work (served from WiredTiger cache).
+    # Using a plain local Docker volume; the placement constraint below keeps
+    # mongo pinned to the same manager node so the volume is always found.
 
 networks:
   ebr-net:
@@ -41,6 +45,10 @@ services:
       timeout: 5s
       retries: 5
     deploy:
+      placement:
+        constraints:
+          - node.labels.workload == high
+          - node.labels.media != true
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -72,6 +80,9 @@ services:
       retries: 3
       start_period: 15s
     deploy:
+      placement:
+        constraints:
+          - node.labels.media != true
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -97,6 +108,9 @@ services:
       retries: 3
       start_period: 10s
     deploy:
+      placement:
+        constraints:
+          - node.labels.media != true
       restart_policy:
         condition: on-failure
         delay: 5s
