@@ -70,7 +70,7 @@ services:
       MONGO_DB: "evil_blunts"
       FORCE_RESEED: "false"
       PYTHONUNBUFFERED: "1"
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3500}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://evilblunts.org,http://localhost:3500}
     networks:
       - ebr-net
     healthcheck:
