@@ -8,12 +8,8 @@
 #   docker push jheidt04/evilblunts-frontend:latest
 #
 # Deploy to swarm:
+#   export MONGO_ROOT_USERNAME=... MONGO_ROOT_PASSWORD=... ALLOWED_ORIGINS=...
 #   docker stack deploy -c docker-compose.yml ebr
-#
-# Env vars must be exported before deploying:
-#   export $(grep -v '^#' .env | xargs) && docker stack deploy -c docker-compose.yml ebr
-#
-# Or deploy via Portainer Git integration (images must be pushed first).
 
 volumes:
   mongo_data:
@@ -27,10 +23,12 @@ volumes:
 networks:
   ebr-net:
     driver: overlay
+  proxy-net:
+    external: true
 
 services:
   mongo:
-    image: mongo:4.4
+    image: mongo:7.0
     volumes:
       - mongo_data:/data/db
     environment:
@@ -40,15 +38,15 @@ services:
     networks:
       - ebr-net
     healthcheck:
-      test: mongo --eval "db.runCommand('ping').ok" --quiet
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 20s
     deploy:
       placement:
         constraints:
-          - node.labels.workload == high
-          - node.labels.media != true
+          - node.labels.avx == true
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -62,7 +60,6 @@ services:
 
   backend:
     image: jheidt04/evilblunts-backend:latest
-    build: ./backend
     environment:
       MONGO_USERNAME: ${MONGO_ROOT_USERNAME}
       MONGO_PASSWORD: ${MONGO_ROOT_PASSWORD}
@@ -96,11 +93,9 @@ services:
 
   frontend:
     image: jheidt04/evilblunts-frontend:latest
-    build: ./frontend
-    ports:
-      - "3500:3500"
     networks:
       - ebr-net
+      - proxy-net
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:3500/"]
       interval: 30s

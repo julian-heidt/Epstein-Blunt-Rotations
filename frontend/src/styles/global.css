@@ -12,20 +12,20 @@
 }
 
 :root {
-  /* Colors */
-  --bg: #0a0a0a;
-  --bg-raised: #141414;
-  --bg-card: #1a1a1a;
-  --bg-card-hover: #222;
-  --surface: #1e1e1e;
-  --border: #2a2a2a;
-  --border-light: #333;
-  --text: #e8e8e8;
-  --text-dim: #888;
-  --text-muted: #555;
-  --accent: #ff6b35;
-  --accent-glow: rgba(255, 107, 53, 0.3);
-  --accent-2: #e8ff47;
+  /* Colors — cabin light palette */
+  --bg: #0b1a0e;
+  --bg-raised: #112010;
+  --bg-card: #162a18;
+  --bg-card-hover: #1d3320;
+  --surface: #1a2e1c;
+  --border: #243d26;
+  --border-light: #2d4e30;
+  --text: #f5f0e6;
+  --text-dim: #9aaa8a;
+  --text-muted: #607060;
+  --accent: #c8934a;
+  --accent-glow: rgba(200, 147, 74, 0.3);
+  --accent-2: #d4b87a;
   --danger: #ff4444;
   --table-brown: #3d2b1f;
   --table-brown-light: #5c3d2e;
@@ -223,7 +223,7 @@ body::before {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #ff8555;
+  background: #d9a05a;
   box-shadow: 0 0 30px var(--accent-glow);
   transform: translateY(-1px);
 }
