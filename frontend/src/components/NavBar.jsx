@@ -38,9 +38,10 @@ export default function NavBar({ screen, onNavigate }) {
       </div>
 
       <div className="navbar-controls">
-        <div className="theme-toggle" role="group" aria-label="Theme">
+        <div className="theme-toggle" role="radiogroup" aria-label="Color theme">
           <button
             className="theme-btn"
+            role="radio"
             aria-label="Blueprint theme"
             aria-checked={theme === 'blueprint'}
             onClick={() => setTheme('blueprint')}
@@ -49,6 +50,7 @@ export default function NavBar({ screen, onNavigate }) {
           </button>
           <button
             className="theme-btn"
+            role="radio"
             aria-label="Forest theme"
             aria-checked={theme === 'forest'}
             onClick={() => setTheme('forest')}
@@ -60,7 +62,7 @@ export default function NavBar({ screen, onNavigate }) {
         <button
           className="mode-btn"
           aria-label={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          aria-checked={mode === 'light'}
+          aria-pressed={mode === 'light'}
           onClick={() => setMode(m => m === 'dark' ? 'light' : 'dark')}
         >
           {mode === 'dark' ? '☀️' : '🌙'}
