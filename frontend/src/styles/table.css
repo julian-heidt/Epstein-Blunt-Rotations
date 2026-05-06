@@ -45,7 +45,7 @@
 }
 
 /* ============================================
-   TABLE SURFACE — the brown circle
+   TABLE SURFACE — the circle
    ============================================ */
 
 .table-surface {
@@ -57,17 +57,17 @@
   transform: translate(-50%, -50%);
   background: radial-gradient(
     ellipse at 40% 35%,
-    var(--table-brown-light) 0%,
-    var(--table-brown) 100%
+    color-mix(in srgb, var(--table-surface) 60%, var(--muted) 40%) 0%,
+    var(--table-surface) 100%
   );
   border-radius: var(--radius-round);
-  border: 3px solid rgba(255, 255, 255, 0.06);
+  border: 3px solid var(--table-border);
   box-shadow:
-    0 0 60px rgba(61, 43, 31, 0.4),
+    0 0 60px rgba(0, 0, 0, 0.4),
     inset 0 -4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Subtle wood grain effect */
+/* Subtle grain effect */
 .table-surface::after {
   content: '';
   position: absolute;
@@ -77,8 +77,8 @@
     120deg,
     transparent,
     transparent 8px,
-    rgba(255, 255, 255, 0.015) 8px,
-    rgba(255, 255, 255, 0.015) 9px
+    rgba(255, 255, 255, 0.012) 8px,
+    rgba(255, 255, 255, 0.012) 9px
   );
 }
 
@@ -103,8 +103,14 @@
 }
 
 .seat:hover .seat-avatar {
-  box-shadow: 0 0 20px var(--accent-glow);
+  box-shadow: 0 0 20px var(--accent-glow), 0 0 40px var(--accent-glow);
   border-color: var(--accent);
+}
+
+.seat:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: var(--radius-round);
 }
 
 /* ============================================
@@ -116,8 +122,8 @@
   height: clamp(54px, 10vw, 76px);
   border-radius: var(--radius-round);
   overflow: hidden;
-  border: 3px solid var(--border-light);
-  background: var(--bg-card);
+  border: 3px solid var(--border-strong);
+  background: var(--card);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -168,7 +174,7 @@
 
 .seat-name--epstein {
   color: var(--accent);
-  font-weight: 700;
+  font-weight: 800;
   font-size: clamp(0.7rem, 1.8vw, 0.9rem);
   text-transform: uppercase;
   letter-spacing: 0.15em;

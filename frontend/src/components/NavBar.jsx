@@ -1,12 +1,27 @@
 /**
  * Persistent navigation bar — visible on all screens.
+ * Includes theme (Blueprint/Forest) and mode (Dark/Light) toggles.
  */
+import { useState, useEffect } from 'react'
+
 export default function NavBar({ screen, onNavigate }) {
+  const [theme, setTheme] = useState(() => localStorage.getItem('ebr-theme') || 'blueprint')
+  const [mode, setMode] = useState(() => localStorage.getItem('ebr-mode') || 'dark')
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    document.documentElement.setAttribute('data-mode', mode)
+    localStorage.setItem('ebr-theme', theme)
+    localStorage.setItem('ebr-mode', mode)
+  }, [theme, mode])
+
   return (
     <nav className="navbar">
       <span className="navbar-brand" onClick={() => onNavigate('home')}>
-        🪑 EB
+        <span className="navbar-brand-tile">EB</span>
+        <span className="navbar-brand-label">Evil Blunts</span>
       </span>
+
       <div className="navbar-links">
         <button
           className={`navbar-link ${screen === 'home' || screen === 'pick' || screen === 'table' ? 'active' : ''}`}
@@ -19,6 +34,36 @@ export default function NavBar({ screen, onNavigate }) {
           onClick={() => onNavigate('leaderboard')}
         >
           Leaderboard
+        </button>
+      </div>
+
+      <div className="navbar-controls">
+        <div className="theme-toggle" role="group" aria-label="Theme">
+          <button
+            className="theme-btn"
+            aria-label="Blueprint theme"
+            aria-checked={theme === 'blueprint'}
+            onClick={() => setTheme('blueprint')}
+          >
+            B
+          </button>
+          <button
+            className="theme-btn"
+            aria-label="Forest theme"
+            aria-checked={theme === 'forest'}
+            onClick={() => setTheme('forest')}
+          >
+            F
+          </button>
+        </div>
+
+        <button
+          className="mode-btn"
+          aria-label={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-checked={mode === 'light'}
+          onClick={() => setMode(m => m === 'dark' ? 'light' : 'dark')}
+        >
+          {mode === 'dark' ? '☀️' : '🌙'}
         </button>
       </div>
     </nav>
