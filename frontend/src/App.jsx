@@ -72,7 +72,7 @@ export default function App() {
 
   // Load all people on mount
   useEffect(() => {
-    fetchPeople(true)
+    fetchPeople()
       .then(setAllPeople)
       .catch(err => {
         console.error(err)

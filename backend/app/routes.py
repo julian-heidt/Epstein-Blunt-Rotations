@@ -63,7 +63,6 @@ async def random_people(
 ):
     db = get_db()
     pipeline = [
-        {"$match": {"has_photo": True}},
         {"$sample": {"size": count}},
         {"$project": SUMMARY_PROJECTION},
     ]
