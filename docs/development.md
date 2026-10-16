@@ -17,37 +17,34 @@ docker compose up --build
 
 ## Building & Pushing Images
 
-Images must be built and pushed to Docker Hub before deploying to Swarm/Portainer.
+GitHub Actions builds and pushes both images on every push to `main` that touches `backend/`, `frontend/` or the workflow (`.github/workflows/build.yml`). You do not build or push by hand for a deployment. To build locally for a smoke test:
 
 ```bash
-# Build
-docker compose build
-
-# Tag for Docker Hub
-docker tag evilblunts-backend:latest jheidt04/evilblunts-backend:latest
-docker tag evilblunts-frontend:latest jheidt04/evilblunts-frontend:latest
-
-# Push
-docker push jheidt04/evilblunts-backend:latest
-docker push jheidt04/evilblunts-frontend:latest
+docker build -t evilblunts-backend:dev ./backend
+docker build -t evilblunts-frontend:dev ./frontend
 ```
+
+Pushed images live at `ghcr.io/julian-heidt/evilblunts-backend` and `ghcr.io/julian-heidt/evilblunts-frontend`, tagged `latest` and `sha-<short commit>`. The packages are private; see the README's Deployment section for how the Swarm authenticates and what to do when `latest` is broken.
 
 ## Deploying to Docker Swarm
 
 ### Via CLI
 
+The manager needs a GHCR login first, or `--with-registry-auth` sends no credentials. `docker login` prompts for a classic PAT with `read:packages`, which never goes on the command line. The README's "Deploying by hand" section says where to get one.
+
 ```bash
+docker login ghcr.io -u julian-heidt
 export $(grep -v '^#' .env | xargs)
-docker stack deploy -c docker-compose.yml ebr
+docker stack deploy --with-registry-auth -c docker-compose.yml ebr
 ```
 
 ### Via Portainer Git Integration
 
-1. Push images to Docker Hub (see above)
+1. Merge to `main` and wait for the **Build** workflow to go green
 2. In Portainer, create a new **Stack** → choose **Git Repository**
 3. Point to this repo and set `docker-compose.yml` as the compose file
 4. Add environment variables: `MONGO_ROOT_USERNAME`, `MONGO_ROOT_PASSWORD`, `ALLOWED_ORIGINS`
-5. Deploy — Portainer pulls the compose file from Git and the images from Docker Hub
+5. Deploy. Portainer pulls the compose file from Git and the images from `ghcr.io` (the `ghcr-julian-heidt` registry must exist in Portainer first, with access to the Swarm environment). The README's Deployment section lists the GitOps settings.
 
 > **Note:** `docker stack deploy` ignores `build:` directives. Images must exist in the registry before deploying.
 

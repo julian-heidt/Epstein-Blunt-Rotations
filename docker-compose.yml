@@ -1,15 +1,16 @@
 # Docker Swarm stack file.
 #
-# Build & push images:
-#   docker compose build
-#   docker tag evilblunts-backend:latest jheidt04/evilblunts-backend:latest
-#   docker tag evilblunts-frontend:latest jheidt04/evilblunts-frontend:latest
-#   docker push jheidt04/evilblunts-backend:latest
-#   docker push jheidt04/evilblunts-frontend:latest
+# Images are built and pushed by GitHub Actions (.github/workflows/build.yml)
+# on every push to main that touches backend/, frontend/ or the workflow:
+#   ghcr.io/julian-heidt/evilblunts-backend:latest   (also sha-<short commit>)
+#   ghcr.io/julian-heidt/evilblunts-frontend:latest  (also sha-<short commit>)
 #
-# Deploy to swarm:
+# Deploy by hand (the manager needs a GHCR login first, or
+# --with-registry-auth sends no credentials; docker login prompts for a
+# read:packages PAT, never in argv):
+#   docker login ghcr.io -u julian-heidt
 #   export MONGO_ROOT_USERNAME=... MONGO_ROOT_PASSWORD=... ALLOWED_ORIGINS=...
-#   docker stack deploy -c docker-compose.yml ebr
+#   docker stack deploy --with-registry-auth -c docker-compose.yml ebr
 
 volumes:
   mongo_data:
@@ -47,6 +48,17 @@ services:
       placement:
         constraints:
           - node.labels.avx == true
+      # stop-first: two mongod tasks must never share the local data volume.
+      update_config:
+        parallelism: 1
+        order: stop-first
+        failure_action: rollback
+        monitor: 90s
+      rollback_config:
+        parallelism: 1
+        order: stop-first
+        failure_action: pause
+        monitor: 90s
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -59,7 +71,7 @@ services:
           memory: 512M
 
   backend:
-    image: jheidt04/evilblunts-backend:latest
+    image: ghcr.io/julian-heidt/evilblunts-backend:latest
     environment:
       MONGO_USERNAME: ${MONGO_ROOT_USERNAME}
       MONGO_PASSWORD: ${MONGO_ROOT_PASSWORD}
@@ -80,6 +92,16 @@ services:
       placement:
         constraints:
           - node.labels.media != true
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        monitor: 120s
+      rollback_config:
+        parallelism: 1
+        order: start-first
+        failure_action: pause
+        monitor: 120s
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -92,7 +114,7 @@ services:
           memory: 256M
 
   frontend:
-    image: jheidt04/evilblunts-frontend:latest
+    image: ghcr.io/julian-heidt/evilblunts-frontend:latest
     networks:
       - ebr-net
       - proxy-net
@@ -106,6 +128,16 @@ services:
       placement:
         constraints:
           - node.labels.media != true
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        monitor: 120s
+      rollback_config:
+        parallelism: 1
+        order: start-first
+        failure_action: pause
+        monitor: 120s
       restart_policy:
         condition: on-failure
         delay: 5s

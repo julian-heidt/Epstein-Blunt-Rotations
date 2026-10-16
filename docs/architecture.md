@@ -15,7 +15,7 @@ Evil Blunts is a three-tier web application that scrapes, merges, and presents d
        └─── /api/ ───────┘
 ```
 
-All three services run via Docker Swarm (or Docker Compose for local development). Custom images are published to Docker Hub under the `jheidt04` namespace.
+All three services run via Docker Swarm (or Docker Compose for local development). GitHub Actions publishes the custom images to `ghcr.io/julian-heidt` on every push to `main` that touches `backend/`, `frontend/` or the workflow.
 
 ## Services
 
@@ -69,7 +69,7 @@ The round table always seats Jeffrey Epstein at the 12 o'clock position, with gu
 | Database  | MongoDB 4.4                         |
 | Scraping  | BeautifulSoup4, lxml, requests      |
 | Matching  | thefuzz (fuzzy string matching)     |
-| Deploy    | Docker Swarm, Portainer, Docker Hub  |
+| Deploy    | Docker Swarm, Portainer, GHCR        |
 
 ## License
 
