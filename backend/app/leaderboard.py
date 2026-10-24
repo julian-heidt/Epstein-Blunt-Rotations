@@ -5,6 +5,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Query, Request
+from pymongo.errors import DuplicateKeyError
 from app.database import get_db
 from app.limiter import limiter
 from app.models import (
@@ -71,7 +72,16 @@ async def save_rotation(request: Request, body: RotationCreate):
         "created_at": datetime.now(timezone.utc),
     }
 
-    await db.rotations.insert_one(doc)
+    try:
+        await db.rotations.insert_one(doc)
+    except DuplicateKeyError:
+        # A concurrent request saved the same table first; return that row.
+        existing = await db.rotations.find_one(
+            {"table_hash": table_hash}, ROTATION_PROJECTION
+        )
+        if existing:
+            return existing
+        raise
 
     return {
         "table_hash": table_hash,
@@ -117,7 +127,14 @@ async def vote_rotation(request: Request, table_hash: str, body: VoteRequest):
         "voted_at": datetime.now(timezone.utc),
         "expires_at": datetime.now(timezone.utc) + timedelta(hours=24),
     }
-    await db.votes.insert_one(vote_doc)
+    try:
+        await db.votes.insert_one(vote_doc)
+    except DuplicateKeyError:
+        # A concurrent request with the same voter_token got in first.
+        raise HTTPException(
+            status_code=409,
+            detail="You already voted on this table today. Come back tomorrow."
+        )
 
     # Atomically update rotation counts
     inc_fields = {"score": body.vote}
