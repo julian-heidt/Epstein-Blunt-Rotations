@@ -18,8 +18,10 @@ volumes:
     # NFS is not supported for MongoDB data files — WiredTiger requires POSIX
     # advisory file locking that NFS does not reliably provide, causing write
     # failures while reads appear to work (served from WiredTiger cache).
-    # Using a plain local Docker volume; the placement constraint below keeps
-    # mongo pinned to the same manager node so the volume is always found.
+    # Using a plain local Docker volume. It exists only on the node where mongo
+    # has run, and the placement constraint below (node.labels.avx == true)
+    # matches more than one node, so nothing guarantees that mongo comes back to
+    # the node that holds the data. See the mongo placement risk in the README.
 
 networks:
   ebr-net:
