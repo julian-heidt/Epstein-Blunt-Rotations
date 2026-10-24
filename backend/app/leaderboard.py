@@ -38,6 +38,9 @@ def _make_table_hash(slugs: list[str]) -> str:
 @limiter.limit("10/minute")
 async def save_rotation(request: Request, body: RotationCreate):
     """Save a rotation. If the same combination exists, return it."""
+    if len(set(body.slugs)) != len(body.slugs):
+        raise HTTPException(status_code=400, detail="Each person can only be seated once")
+
     db = get_db()
     table_hash = _make_table_hash(body.slugs)
 
@@ -54,8 +57,8 @@ async def save_rotation(request: Request, body: RotationCreate):
         {"_id": 0, "name": 1, "slug": 1, "photo_url": 1},
     ).to_list(length=20)
 
-    if not people_docs:
-        raise HTTPException(status_code=400, detail="No valid people found for given slugs")
+    if len(people_docs) != len(body.slugs):
+        raise HTTPException(status_code=400, detail="Unknown person in rotation")
 
     doc = {
         "table_hash": table_hash,
