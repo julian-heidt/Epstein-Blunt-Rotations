@@ -8,23 +8,25 @@ Evil Blunts is a three-tier web application that scrapes, merges, and presents d
 ┌────────────┐     ┌────────────┐     ┌──────────┐
 │  Frontend   │────▶│  Backend   │────▶│  MongoDB  │
 │  React+Vite │     │  FastAPI   │     │  v7       │
-│  nginx:3000 │     │  :8000     │     │  :27017   │
+│  nginx:3500 │     │  :8000     │     │  :27017   │
 └────────────┘     └────────────┘     └──────────┘
        ▲                 │
        │    nginx proxy  │  startup: scrape → seed DB
        └─── /api/ ───────┘
 ```
 
-All three services run via Docker Swarm (or Docker Compose for local development). GitHub Actions publishes the custom images to `ghcr.io/julian-heidt` on every push to `main` that touches `backend/`, `frontend/` or the workflow.
+All three services run as a Docker Swarm stack. For local development, run them directly as described in the Development Guide. GitHub Actions publishes the custom images to `ghcr.io/julian-heidt` on every push to `main` that touches `backend/`, `frontend/` or the workflow.
 
 ## Services
 
 ### MongoDB (`mongo`)
-- Image: `mongo:4.4` (4.4 is the latest version that does not require AVX CPU support)
-- Persistent volume: `mongo_data`
-- Healthcheck: `mongo --eval "db.runCommand('ping').ok"`
-- Database: `evil_blunts`, collection: `people`
-- Indexes: `slug` (unique), `has_photo`, `section_letter`
+- Image: `mongo:7.0`. It needs a CPU with AVX, so the stack file places it on nodes labelled `avx=true`.
+- Persistent volume: `mongo_data`, a local Docker volume that lives on one node. It cannot sit on NFS because WiredTiger needs POSIX file locking.
+- Healthcheck: `echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet`
+- Database: `evil_blunts`
+- `people` collection, written by the scraper. Indexes: `slug` (unique), `has_photo`, `section_letter`.
+- `rotations` collection, written by the leaderboard routes. Indexes: `table_hash` (unique), `score`, `upvotes`, `downvotes`, `created_at`, `seat_count`.
+- `votes` collection. Indexes: `expires_at` (TTL, so a vote document expires after 24 hours) and `table_hash` with `voter_token` (unique).
 
 ### Backend (`backend`)
 - Image: `python:3.12-slim`
@@ -35,7 +37,7 @@ All three services run via Docker Swarm (or Docker Compose for local development
 
 ### Frontend (`frontend`)
 - Build: `node:20-alpine` → production build with Vite
-- Serve: `nginx:alpine` on port 3000
+- Serve: `nginx:alpine` on port 3500
 - nginx proxies `/api/` requests to the backend
 
 ## Data Flow (Startup)
@@ -57,8 +59,12 @@ The round table always seats Jeffrey Epstein at the 12 o'clock position, with gu
 |--------|--------------------|---------------------------------------------|
 | GET    | `/api/health`      | Health check + people count                 |
 | GET    | `/api/people`      | List all (filter: `has_photo`, `letter`)    |
-| GET    | `/api/people/random` | Random sample of N people with photos     |
+| GET    | `/api/people/random` | Random sample of `count` people (1 to 20) |
 | GET    | `/api/people/{slug}` | Full person detail by slug                |
+| POST   | `/api/rotations`   | Save a rotation of 3 to 7 distinct slugs. Returns the existing row for the same set. Limited to 10 per minute |
+| GET    | `/api/rotations/{table_hash}` | One rotation. With `voter_token`, includes that voter's vote |
+| POST   | `/api/rotations/{table_hash}/vote` | Upvote or downvote (`vote` is 1 or -1). One vote per `voter_token` per 24 hours. Limited to 5 per minute |
+| GET    | `/api/leaderboard` | Paginated rotations (`sort_by`, `seat_count`, `page`, `limit`) |
 
 ## Tech Stack
 
@@ -66,7 +72,7 @@ The round table always seats Jeffrey Epstein at the 12 o'clock position, with gu
 |-----------|-------------------------------------|
 | Frontend  | React 18, Vite 5, plain CSS        |
 | Backend   | Python 3.12, FastAPI, Motor (async) |
-| Database  | MongoDB 4.4                         |
+| Database  | MongoDB 7.0                         |
 | Scraping  | BeautifulSoup4, lxml, requests      |
 | Matching  | thefuzz (fuzzy string matching)     |
 | Deploy    | Docker Swarm, Portainer, GHCR        |
