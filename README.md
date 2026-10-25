@@ -24,19 +24,66 @@ All data is sourced from publicly available sites:
 
 ## Deployment
 
-Images are published to Docker Hub under [`jheidt04`](https://hub.docker.com/u/jheidt04):
+GitHub Actions builds both images on every push to `main` that touches `backend/`, `frontend/` or the workflow itself (`.github/workflows/build.yml`) and pushes them to the GitHub Container Registry:
 
-- `jheidt04/evilblunts-backend:latest`
-- `jheidt04/evilblunts-frontend:latest`
+- `ghcr.io/julian-heidt/evilblunts-backend:latest` (also tagged `sha-<short commit>`)
+- `ghcr.io/julian-heidt/evilblunts-frontend:latest` (also tagged `sha-<short commit>`)
 
-### Docker Swarm / Portainer
+Pull requests that touch those paths build both images without pushing. Docs-only commits do not trigger a build. Any change under `backend/` or `frontend/` rebuilds and redeploys both services, because the image labels carry the commit sha and a new digest always results. The stack file normally references `latest`. The `sha-` tags let you pin a broken `latest` back to a good build, as described under "When latest is broken". Builds on `main` queue behind the running one, and GitHub keeps only one queued run per branch, so a burst of pushes can skip the build and the `sha-` tag of an intermediate commit. Check that the tag exists before you pin to it.
 
-1. Build and push images (see [Development Guide](docs/development.md#building--pushing-images))
-2. In Portainer, add a new stack via **Git Repository**, pointing to this repo
-3. Set the required environment variables (`MONGO_ROOT_USERNAME`, `MONGO_ROOT_PASSWORD`, `ALLOWED_ORIGINS`)
-4. Deploy — Portainer will pull the pre-built images from Docker Hub
+### GitHub side
 
-> **Note:** Docker Swarm (`docker stack deploy`) does not support `build:` directives. Images must be built and pushed to the registry before deploying.
+- Both packages are **private**. GitHub makes a new container package private on first publish; leave it that way. The repo itself is public, so this protects only the built artifacts, not the Dockerfiles or source. The cost is a long-lived PAT in Portainer that can read every private package on the account. Container registry storage is free for now, and GitHub says it will announce any change at least a month ahead. If that changes, old `sha-` tags need cleanup.
+- The workflow logs in with the built-in `GITHUB_TOKEN` (`permissions: packages: write`), so the repo needs no Actions secret.
+- The Swarm pulls with a classic personal access token named `portainer-ghcr-pull` that has only the `read:packages` scope. It lives only in Portainer, as the password of the registry entry `ghcr-julian-heidt`. Never commit it and never store it as an Actions secret.
+
+### Portainer stack settings
+
+Cutover order for the existing stack: add the `ghcr-julian-heidt` registry in Portainer, merge the PR, wait for the first `main` Build to go green, settle the mongo placement described below, then update the stack to the settings below and turn **GitOps updates** on. A redeploy before the images exist fails to pull, rolls back to the previous images and retries on the next poll.
+
+| Setting | Value |
+|---|---|
+| Registry (Registries page) | Custom registry named `ghcr-julian-heidt`, URL `ghcr.io`, authentication on, username `julian-heidt`, password the `portainer-ghcr-pull` token above, with access granted to the Swarm environment |
+| Build method | Git Repository |
+| Repository URL | `https://github.com/julian-heidt/Epstein-Blunt-Rotations` |
+| Repository reference | `refs/heads/main` |
+| Compose path | `docker-compose.yml` |
+| Authentication | off. The repo is public, so no Git credential is needed |
+| GitOps updates | on, mechanism **Polling**, fetch interval `10m` |
+| Re-pull image | on |
+| Force redeployment | on |
+| Environment variables | `MONGO_ROOT_USERNAME`, `MONGO_ROOT_PASSWORD`, `ALLOWED_ORIGINS` |
+| Stack name | `ebr`. If the live stack has another name, update that stack instead of creating a new one, and use its name wherever `ebr` or `ebr_` appears below, including the `docker stack deploy` argument. |
+
+With **Re-pull image** and **Force redeployment** on, Portainer redeploys the stack every interval and Swarm swaps in whichever `latest` digest is current. Every service has a healthcheck plus `update_config` with `failure_action: rollback`, so an image that never turns healthy rolls back to the previous digest. Check `docker service ps ebr_backend` on a manager rather than trusting the Portainer stack status.
+
+Mongo has a placement risk under GitOps. It runs the floating `mongo:7.0` tag from Docker Hub, so with **Re-pull image** on, an upstream rebuild of that tag replaces the mongo task on the next poll, and the update is stop-first. The data volume is a local Docker volume, and `node.labels.avx == true` matches three nodes. If Swarm places the new task on a different avx node, mongo can start on an empty volume, pass its healthcheck, count as a successful update and trigger no rollback. The site then serves an empty database until the backend restarts and reseeds, and a reseed restores only the scraped `people` collection. To recover, turn **GitOps updates** off and find the node that held the data. `docker volume ls` does not show it, because the rescheduled task creates `ebr_mongo_data` on its new node too. Read the node of the Shutdown task from before the move in `docker service ps ebr_mongo --no-trunc`, or compare volume sizes with `docker system df -v` on each avx node. Then pin mongo there with `docker service update --constraint-add node.hostname==<node> ebr_mongo`. Saved rotations and votes (the `rotations` and `votes` collections) exist only on that old volume, and any saved while mongo ran on the empty volume stay on the new node's volume after you pin mongo back. The pin lasts only until the next redeploy from the stack file, which restores the placement in `docker-compose.yml`. The permanent fix is a constraint in `docker-compose.yml` that names the node holding the data. Add it next to `node.labels.avx == true` instead of replacing it, so a missing label leaves mongo pending and does not start it on an empty volume. A digest-pinned `mongo:7.0.x@sha256:...` image stops an upstream rebuild of the tag from replacing the task. It does not stop a node drain, a node outage or a replacement task after a failure from moving mongo to another avx node, so it does not replace the constraint.
+
+A brand-new stack (not the cutover of the existing stack) starts from an empty volume and cold image caches, and Swarm has no `depends_on`. The backend runs the scraper first, and the scraper exits non-zero when mongo is unreachable after 10 seconds. The backend restart policy stops after 5 attempts 5 seconds apart, so a slow mongo image pull or first initialization can leave `ebr_backend` with only failed tasks. If mongo is healthy and `docker service ps ebr_backend` shows only failed tasks, run `docker service update --force ebr_backend` on a manager.
+
+### When latest is broken
+
+Rollback keeps the old task running, but it does not stop the loop. The stored compose still says `latest`, so every poll re-resolves the same broken digest and the update fails again. For `backend` and `frontend` (start-first) that is churn. `mongo` runs `mongo:7.0` from Docker Hub, so a broken GHCR `latest` never touches it. It enters the same loop only if a new upstream `mongo:7.0` build fails its healthcheck. Then each stop-first attempt takes the database down for about the monitor period, and retagging a GHCR image does nothing for it.
+
+For `backend` or `frontend`, use step 1. Use step 2 or 3 instead when you do not want to change `main`. Do not combine steps 1 and 2, because a re-run rebuilds the commit and pushes `sha-<good>` again, so a tag you pinned then points at the new image.
+
+1. Pin the previous build. Change `image:` for the service in `docker-compose.yml` to `ghcr.io/julian-heidt/evilblunts-backend:sha-<good>` (or `evilblunts-frontend`), commit to `main`, and let Portainer's polling redeploy it. Revert the pin once a fixed `latest` exists. A `sha-` tag moves if that commit's Build runs again. To pin an image that cannot move, use its digest, which `docker buildx imagetools inspect ghcr.io/julian-heidt/evilblunts-backend:sha-<good>` prints, as `image: ghcr.io/julian-heidt/evilblunts-backend@sha256:<digest>`.
+2. Re-run the **Build** run for the `<good>` commit in the Actions tab. That is the last run whose image worked, not simply the newest green run. The re-run rebuilds that commit instead of copying the old image, republishes it as `latest` and needs no token. GitHub allows a re-run only within 30 days of the original run. `frontend/package-lock.json` pins the JavaScript dependencies and `npm ci` installs exactly those. `backend/requirements.txt` pins only the direct Python dependencies, so a backend rebuild can still pull different transitive versions or reuse a cached layer that holds the broken ones. Use step 1 when a dependency is the suspected cause.
+3. Retag from a workstation: `docker buildx imagetools create -t ghcr.io/julian-heidt/evilblunts-backend:latest ghcr.io/julian-heidt/evilblunts-backend:sha-<good>` (same for the frontend). The workstation must be logged in to `ghcr.io` with a token that has `write:packages`, which the Portainer pull token does not have.
+
+A direct `docker service update` on a manager does not last, because the next poll undoes it while **Force redeployment** is on. A green Build run does not prove the image works, because the workflow builds the images but never starts them. For `mongo`, turn the stack's **GitOps updates** off in Portainer while debugging, then back on, or pin it to a known-good `7.0.x` tag or digest.
+
+### Deploying by hand
+
+Use this only for a stack that Portainer does not manage. On a Portainer-managed stack, turn **GitOps updates** off first, because the next poll redeploys the stack from Git and undoes a hand deploy. The manager needs a GHCR login first, or `--with-registry-auth` sends no credentials. `docker login` prompts for a classic PAT with `read:packages`, and the PAT never goes on the command line. Portainer does not show the stored `portainer-ghcr-pull` value, so keep that value in a password manager, or create a short-lived `read:packages` token for the manual deploy:
+
+```bash
+docker login ghcr.io -u julian-heidt
+export MONGO_ROOT_USERNAME=... MONGO_ROOT_PASSWORD=... ALLOWED_ORIGINS=...
+docker stack deploy --with-registry-auth -c docker-compose.yml ebr
+```
+
+> **Note:** Docker Swarm (`docker stack deploy`) does not support `build:` directives. Images must be built and pushed to the registry before deploying; the workflow does that.
 
 ## Technical Docs
 
