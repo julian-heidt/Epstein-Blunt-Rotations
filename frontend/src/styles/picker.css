@@ -188,9 +188,12 @@
 
 .picker-hint {
   margin: 0;
+  padding: 0.25rem 0.75rem;
   font-size: 0.85rem;
   color: var(--text);
   text-align: center;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
 }
 
 /* ============================================
