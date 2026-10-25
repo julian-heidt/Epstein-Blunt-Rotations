@@ -29,7 +29,7 @@ GitHub Actions builds both images on every push to `main` that touches `backend/
 - `ghcr.io/julian-heidt/evilblunts-backend:latest` (also tagged `sha-<short commit>`)
 - `ghcr.io/julian-heidt/evilblunts-frontend:latest` (also tagged `sha-<short commit>`)
 
-Pull requests that touch those paths build both images without pushing. Docs-only commits do not trigger a build. Any change under `backend/` or `frontend/` rebuilds and redeploys both services, because the image labels carry the commit sha and a new digest always results. The stack file normally references `latest`. The `sha-` tags let you pin a broken `latest` back to a good build, as described under "When latest is broken".
+Pull requests that touch those paths build both images without pushing. Docs-only commits do not trigger a build. Any change under `backend/` or `frontend/` rebuilds and redeploys both services, because the image labels carry the commit sha and a new digest always results. The stack file normally references `latest`. The `sha-` tags let you pin a broken `latest` back to a good build, as described under "When latest is broken". Builds on `main` queue behind the running one, and GitHub keeps only one queued run per branch, so a burst of pushes can skip the build and the `sha-` tag of an intermediate commit. Check that the tag exists before you pin to it.
 
 ### GitHub side
 
