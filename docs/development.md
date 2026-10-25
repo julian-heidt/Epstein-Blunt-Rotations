@@ -11,7 +11,7 @@
 `docker-compose.yml` is a Swarm stack file. It has no `build:` keys, publishes no ports, expects the external `proxy-net` network and pulls private GHCR images, so `docker compose up` does not work with it. Run the three pieces directly:
 
 ```bash
-docker run -d --name ebr-mongo -p 27017:27017 mongo:7.0
+docker run -d --name ebr-mongo -p 127.0.0.1:27017:27017 mongo:7.0
 
 cd backend
 pip install -r requirements.txt
@@ -78,7 +78,7 @@ python -m scraper.run
 uvicorn app.main:app --reload --port 8000
 ```
 
-Requires a running MongoDB instance. The default `MONGO_HOST` is `mongo:27017`, the Swarm service name, so set `MONGO_HOST=localhost:27017` when MongoDB runs on your machine (see Quick Start).
+Requires a running MongoDB instance. The `docker run` command under Quick Start starts one without authentication and binds it to localhost only. The default `MONGO_HOST` is `mongo:27017`, the Swarm service name, so set `MONGO_HOST=localhost:27017` when MongoDB runs on your machine (see Quick Start).
 
 ### Frontend
 
@@ -111,9 +111,9 @@ To force a fresh scrape and reseed:
 cd backend
 FORCE_RESEED=true MONGO_HOST=localhost:27017 python -m scraper.run
 
-# Option 2: Remove the MongoDB container, which also deletes saved rotations and votes
-docker rm -f ebr-mongo
-docker run -d --name ebr-mongo -p 27017:27017 mongo:7.0
+# Option 2: Remove the MongoDB container and its anonymous volumes (-v), which deletes saved rotations and votes
+docker rm -fv ebr-mongo
+docker run -d --name ebr-mongo -p 127.0.0.1:27017:27017 mongo:7.0
 ```
 
 ## Project Structure
