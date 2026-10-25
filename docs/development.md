@@ -100,6 +100,7 @@ The Vite dev server runs on port 5173 by default. Configure the API proxy in `vi
 | `MONGO_USERNAME`, `MONGO_PASSWORD` | unset                      | Credentials (auth database `admin`). Authentication is on only when both are set |
 | `FORCE_RESEED`   | `false`                                      | Set to `true` to re-scrape and reseed |
 | `ALLOWED_ORIGINS` | `http://localhost:3500,http://localhost:5173,http://127.0.0.1:3500,http://127.0.0.1:5173` | Comma-separated CORS origins |
+| `TRUSTED_PROXY_CIDRS` | `10.0.0.0/8`                            | Comma-separated networks whose `X-Real-IP` header the rate limiter trusts. See "Client address and rate limits" in the architecture doc |
 | `PYTHONUNBUFFERED` | `1`                                        | Ensures real-time log output in Docker |
 
 ## Re-seeding the Database
@@ -180,5 +181,5 @@ evil-blunts/
 ## Design Notes
 
 - Two themes, `blueprint` and `forest`, each with a dark and a light mode. `NavBar.jsx` sets `data-theme` and `data-mode` on the `<html>` element and stores the choice in localStorage (`ebr-theme`, `ebr-mode`). The colour tokens are in `styles/global.css`.
-- Fonts: Syne (headings) and DM Sans (body), requested from Google Fonts in `index.html`
+- Fonts: Syne (headings) and DM Sans (body), self-hosted through the `@fontsource` npm packages. `src/main.jsx` imports the latin and latin-ext files, and Vite bundles them into `/assets/`, so the CSP needs no font source beyond `'self'`. Both fonts use the SIL Open Font License 1.1. The license texts are in `public/font-licenses/` and the site serves them at `/font-licenses/`.
 - Round table seats positioned via trigonometry with Epstein at the top (12 o'clock)

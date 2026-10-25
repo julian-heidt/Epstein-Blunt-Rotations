@@ -61,6 +61,21 @@ Mongo has a placement risk under GitOps. It runs the floating `mongo:7.0` tag fr
 
 A brand-new stack (not the cutover of the existing stack) starts from an empty volume and cold image caches, and Swarm has no `depends_on`. The backend runs the scraper first, and the scraper exits non-zero when mongo is unreachable after 10 seconds. The backend restart policy stops after 5 attempts 5 seconds apart, so a slow mongo image pull or first initialization can leave `ebr_backend` with only failed tasks. If mongo is healthy and `docker service ps ebr_backend` shows only failed tasks, run `docker service update --force ebr_backend` on a manager.
 
+### Check the client address after a deploy
+
+The rate limits (10 saves and 5 votes per minute) are per visitor only if Nginx Proxy Manager passes the visitor's real address down the chain. How that works is in the architecture doc under "Client address and rate limits". After a deploy, run this from a machine outside the Swarm. It posts unknown slugs, so it stores nothing.
+
+```bash
+for i in $(seq 1 12); do
+  curl -s -o /dev/null -w '%{http_code} ' -X POST https://evilblunts.org/api/rotations \
+    -H 'Content-Type: application/json' \
+    -H "X-Forwarded-For: 203.0.113.$i" -H "X-Real-IP: 203.0.113.$i" \
+    -d '{"slugs":["no-such-person-1","no-such-person-2","no-such-person-3"]}'
+done; echo
+```
+
+Expect ten `400` and then two `429`. The fake addresses must not buy a fresh limit. Then, within the same minute, send one request from another network, such as a phone on mobile data. It must return `400`, not `429`. A `429` there means all visitors still share one bucket, so check what address NPM logs for visitors and whether `proxy-net` sits inside `10.0.0.0/8`.
+
 ### When latest is broken
 
 Rollback keeps the old task running, but it does not stop the loop. The stored compose still says `latest`, so every poll re-resolves the same broken digest and the update fails again. For `backend` and `frontend` (start-first) that is churn. `mongo` runs `mongo:7.0` from Docker Hub, so a broken GHCR `latest` never touches it. It enters the same loop only if a new upstream `mongo:7.0` build fails its healthcheck. Then each stop-first attempt takes the database down for about the monitor period, and retagging a GHCR image does nothing for it.
@@ -98,5 +113,7 @@ For developers and contributors:
 [![CC BY-SA 4.0](https://licensebuttons.net/l/by-sa/4.0/88x31.png)](https://creativecommons.org/licenses/by-sa/4.0/)
 
 This project is licensed under the [Creative Commons Attribution-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0/).
+
+The fonts Syne and DM Sans are self-hosted under the SIL Open Font License 1.1. Their license texts are in `frontend/public/font-licenses/`.
 
 Biographical content, descriptions, and images are sourced from [Wikipedia](https://en.wikipedia.org/wiki/List_of_people_named_in_the_Epstein_files) (CC BY-SA 4.0, Wikipedia contributors). Email corpus data is sourced from [jmail.world](https://jmail.world/person).
