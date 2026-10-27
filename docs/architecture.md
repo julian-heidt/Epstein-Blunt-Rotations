@@ -86,7 +86,7 @@ The round table always seats Jeffrey Epstein at the 12 o'clock position, with gu
 
 | Layer     | Technology                          |
 |-----------|-------------------------------------|
-| Frontend  | React 18, Vite 5, plain CSS        |
+| Frontend  | React 18, Vite 6, React Router 7, plain CSS |
 | Backend   | Python 3.12, FastAPI, Motor (async) |
 | Database  | MongoDB 7.0                         |
 | Scraping  | BeautifulSoup4, lxml, requests      |
