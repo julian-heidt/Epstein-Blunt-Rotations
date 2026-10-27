@@ -1,8 +1,13 @@
 import { useState, useMemo } from 'react'
 
+// The backend rejects a rotation with fewer than 3 people (422), so the
+// picker must not let a smaller table through.
+const MIN_PEOPLE = 3
+
 /**
  * Grid of all available people. User picks up to maxCount.
- * Has search, select/deselect, random fill, and Submit.
+ * Has search, select/deselect, random fill, and Submit. Submit needs at
+ * least MIN_PEOPLE people.
  */
 export default function PersonPicker({ people, maxCount, onDone, onBack, onRandomFill }) {
   const [search, setSearch] = useState('')
@@ -41,6 +46,9 @@ export default function PersonPicker({ people, maxCount, onDone, onBack, onRando
   }
 
   const isSelected = (slug) => selected.some(p => p.slug === slug)
+
+  const needed = MIN_PEOPLE - selected.length
+  const canSit = needed <= 0
 
   return (
     <div className="picker">
@@ -92,10 +100,15 @@ export default function PersonPicker({ people, maxCount, onDone, onBack, onRando
       </div>
 
       <div className="picker-footer">
+        {!canSit && (
+          <p className="picker-hint" role="status">
+            A table needs at least {MIN_PEOPLE} people. Pick {needed} more.
+          </p>
+        )}
         <button
           className="btn-primary"
-          onClick={() => onDone(selected)}
-          disabled={selected.length === 0}
+          onClick={() => canSit && onDone(selected)}
+          disabled={!canSit}
         >
           Sit Down ({selected.length})
         </button>

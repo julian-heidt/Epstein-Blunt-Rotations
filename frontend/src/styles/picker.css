@@ -175,13 +175,25 @@
   padding: 1rem;
   background: linear-gradient(transparent, var(--bg) 30%);
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
   z-index: 10;
 }
 
 .picker-footer .btn-primary {
   max-width: 400px;
   width: 100%;
+}
+
+.picker-hint {
+  margin: 0;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text);
+  text-align: center;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
 }
 
 /* ============================================
