@@ -1,0 +1,12 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "schedule:weekly", "group:allNonMajor"],
+  "packageRules": [
+    {
+      "description": "A mongo major bump needs a data migration plan",
+      "matchPackageNames": ["mongo"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    }
+  ]
+}
