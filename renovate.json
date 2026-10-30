@@ -7,6 +7,12 @@
       "matchPackageNames": ["mongo"],
       "matchUpdateTypes": ["major"],
       "enabled": false
+    },
+    {
+      "description": "A @vitejs/plugin-react major needs the matching vite major",
+      "matchPackageNames": ["vite", "@vitejs/plugin-react"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "vite major"
     }
   ]
 }
