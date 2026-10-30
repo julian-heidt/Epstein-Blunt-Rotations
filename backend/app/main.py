@@ -4,6 +4,7 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
@@ -70,6 +71,12 @@ app.add_middleware(
 
 app.include_router(router)
 app.include_router(leaderboard_router)
+
+# Prometheus metrics. /metrics is outside /api, so the frontend nginx does not
+# proxy it.
+Instrumentator(excluded_handlers=["/metrics"]).instrument(app).expose(
+    app, include_in_schema=False
+)
 
 
 @app.get("/")
