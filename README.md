@@ -100,6 +100,12 @@ docker stack deploy --with-registry-auth -c docker-compose.yml ebr
 
 > **Note:** Docker Swarm (`docker stack deploy`) does not support `build:` directives. Images must be built and pushed to the registry before deploying; the workflow does that.
 
+## Monitoring
+
+The backend serves Prometheus metrics at `/metrics` on port 8000. The path is outside `/api`, and the frontend nginx proxies only `/api/`, so the site does not expose it. The `backend` service joins the external `monitoring` network with the alias `ebr-backend`, and the shared Alloy collector scrapes `http://ebr-backend:8000/metrics` over that network. The stack publishes no new port.
+
+The `monitoring` network must exist before this stack deploys. The compose file declares it as external, so a deploy fails if it is missing.
+
 ## Technical Docs
 
 For developers and contributors:

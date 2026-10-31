@@ -29,6 +29,8 @@ networks:
     driver: overlay
   proxy-net:
     external: true
+  monitoring:
+    external: true
 
 services:
   mongo:
@@ -85,7 +87,10 @@ services:
       PYTHONUNBUFFERED: "1"
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://evilblunts.org,http://localhost:3500}
     networks:
-      - ebr-net
+      ebr-net:
+      monitoring:
+        aliases:
+          - ebr-backend
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
       interval: 30s
