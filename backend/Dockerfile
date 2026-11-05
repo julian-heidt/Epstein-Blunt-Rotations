@@ -7,6 +7,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+ARG GIT_SHA=dev
+ENV GIT_SHA=$GIT_SHA
+
 # Run as non-root user
 RUN addgroup --system app && adduser --system --ingroup app app
 USER app

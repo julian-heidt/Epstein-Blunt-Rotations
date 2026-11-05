@@ -102,7 +102,7 @@ docker stack deploy --with-registry-auth -c docker-compose.yml ebr
 
 ## Monitoring
 
-The backend serves Prometheus metrics at `/metrics` on port 8000. The path is outside `/api`, and the frontend nginx proxies only `/api/`, so the site does not expose it. The `backend` service joins the external `monitoring` network with the alias `ebr-backend`, and the shared Alloy collector scrapes `http://ebr-backend:8000/metrics` over that network. The stack publishes no new port.
+The backend sends OpenTelemetry traces and metrics over OTLP HTTP to `http://alloy-apps:4318` on the external `monitoring` network, and writes JSON logs to stdout with `otelTraceID`, `otelSpanID` and `otelServiceName` on each record. It has no `/metrics` endpoint. The service name is `evil-blunts-backend`. `service.version` is the first 12 characters of the `GIT_SHA` build argument, which the build workflow sets to the commit SHA. Without `OTEL_EXPORTER_OTLP_ENDPOINT`, spans and metrics go to the console. The `backend` service keeps the alias `ebr-backend` on the `monitoring` network. The stack publishes no new port.
 
 The `monitoring` network must exist before this stack deploys. The compose file declares it as external, so a deploy fails if it is missing.
 
