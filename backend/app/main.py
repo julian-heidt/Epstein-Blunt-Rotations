@@ -74,7 +74,7 @@ app.include_router(leaderboard_router)
 
 # Prometheus metrics. /metrics is outside /api, so the frontend nginx does not
 # proxy it.
-Instrumentator(excluded_handlers=["/metrics"]).instrument(app).expose(
+Instrumentator(excluded_handlers=[r"^/metrics$"]).instrument(app).expose(
     app, include_in_schema=False
 )
 
