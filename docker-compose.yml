@@ -86,6 +86,11 @@ services:
       FORCE_RESEED: "false"
       PYTHONUNBUFFERED: "1"
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://evilblunts.org,http://localhost:3500}
+      OTEL_SERVICE_NAME: evil-blunts-backend
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy-apps:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_SEMCONV_STABILITY_OPT_IN: http
+      OTEL_PYTHON_LOG_CORRELATION: "true"
     networks:
       ebr-net:
       monitoring:

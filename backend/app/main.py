@@ -4,7 +4,7 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from prometheus_fastapi_instrumentator import Instrumentator
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
@@ -12,6 +12,9 @@ from app.database import get_db, close_db
 from app.limiter import limiter
 from app.routes import router
 from app.leaderboard import router as leaderboard_router
+from app.telemetry import setup_telemetry
+
+setup_telemetry()
 
 
 async def _ensure_indexes():
@@ -72,11 +75,7 @@ app.add_middleware(
 app.include_router(router)
 app.include_router(leaderboard_router)
 
-# Prometheus metrics. /metrics is outside /api, so the frontend nginx does not
-# proxy it.
-Instrumentator(excluded_handlers=[r"^/metrics$"]).instrument(app).expose(
-    app, include_in_schema=False
-)
+FastAPIInstrumentor.instrument_app(app)
 
 
 @app.get("/")
