@@ -22,7 +22,7 @@ All three services run as a Docker Swarm stack. For local development, run them 
 ### MongoDB (`mongo`)
 - Image: `mongo:7.0`. It needs a CPU with AVX, so the stack file places it on nodes labelled `avx=true`.
 - Persistent volume: `mongo_data`, a local Docker volume that lives on one node. It cannot sit on NFS because WiredTiger needs POSIX file locking.
-- Healthcheck: `echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet`
+- Healthcheck: a TCP connect, `bash -c 'exec 3<>/dev/tcp/127.0.0.1/27017'`. It avoids starting a mongosh process every interval inside the 1 CPU limit. A mongod that listens but hangs still reads as healthy.
 - Database: `evil_blunts`
 - `people` collection, written by the scraper. Indexes: `slug` (unique), `has_photo`, `section_letter`.
 - `rotations` collection, written by the leaderboard routes. Indexes: `table_hash` (unique), `score`, `upvotes`, `downvotes`, `created_at`, `seat_count`.
