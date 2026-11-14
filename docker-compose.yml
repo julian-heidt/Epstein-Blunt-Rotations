@@ -44,7 +44,10 @@ services:
     networks:
       - ebr-net
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      # TCP connect only. A mongosh ping starts a Node.js process every
+      # interval inside the 1 CPU limit shared with mongod. The mongo:7.0
+      # image is Ubuntu-based and has bash, which provides /dev/tcp.
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/27017"]
       interval: 10s
       timeout: 5s
       retries: 5
